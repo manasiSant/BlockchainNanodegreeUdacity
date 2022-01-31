@@ -70,15 +70,24 @@ class Blockchain {
                 block.height = self.chain.length;
                 self.chain.height = self.chain.length;
                 block.time = new Date().getTime().toString().slice(0,-3);
-                block.hash = SHA256(JSON.stringify(block)).toString();
 
                 if(self.chain.length > 0)
                 {
                     block.previousBlockHash = self.chain[self.chain.length - 1].hash;
                 }
-
-                self.chain.push(block);
-                resolve(self);
+                block.hash = SHA256(JSON.stringify(block)).toString();
+                //validating chain before adding new block
+                let isChainValid = await this.validateChain();
+                if(isChainValid)
+                {
+                    self.chain.push(block);
+                    resolve(self);
+                }
+                else
+                {
+                    console.log("Invalid blockchain.");
+                    resolve(null);    
+                }
             }
             catch(err)
             {
@@ -158,7 +167,7 @@ class Blockchain {
     getBlockByHash(hash) {
         let self = this;
         return new Promise((resolve, reject) => {
-            let block = self.chain.filter(b => b.hash === hash)[0];
+            let block = self.chain.find(b => b.hash === hash);
             if(block)
             {
                 resolve(block);
@@ -231,11 +240,24 @@ class Blockchain {
         let errorLog = [];
         return new Promise(async (resolve, reject) => {
             try{
+                let tempHash = null;
                 self.chain.forEach(block => {
+                    if(block.height >= 0)
                     block.validate().then((result) => {
                         if(result != true)
                         {
-                            errorLog.push(result);
+                            errorLog.push("One of the block is invalid");
+                        }
+                        else //valid block
+                        {
+                            if(block.height > 0)
+                            {
+                                if(block.previousBlockHash != tempHash)
+                                {
+                                    errorLog.push("Invalid blockchain. Improper order of blocks.");
+                                }
+                            }
+                            tempHash = block.hash;
                         }
                     });
                 });
