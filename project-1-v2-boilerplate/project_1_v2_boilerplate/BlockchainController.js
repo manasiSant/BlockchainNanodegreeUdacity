@@ -23,7 +23,6 @@ class BlockchainController {
     getBlockchainValidity() {
         this.app.get("/validateChain", async (req, res) => {
             let errorLog  = await this.blockchain.validateChain();
-            console.log("Err - " + errorLog);
             if(errorLog == null)
             {
                 return res.status(500).send("Failed to validate blockchain");

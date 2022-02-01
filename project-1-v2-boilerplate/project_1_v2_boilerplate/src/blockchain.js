@@ -229,6 +229,12 @@ class Blockchain {
         });
     }
 
+    // async function checkBlockValidation() {
+    //     self.chain.forEach(block => {
+    //         let result = await block.validate();
+    //         if()
+    //     });
+    // }
     /**
      * This method will return a Promise that will resolve with the list of errors when validating the chain.
      * Steps to validate:
@@ -241,23 +247,22 @@ class Blockchain {
         return new Promise(async (resolve, reject) => {
             try{
                 let tempHash = null;
+                const promises = [];
                 self.chain.forEach(block => {
-                    if(block.height >= 0)
-                    block.validate().then((result) => {
+                    promises.push(block.validate());
+                    
+                    if(block.height > 0 && block.previousBlockHash != tempHash)
+                    {
+                        errorLog.push("Invalid blockchain. Improper order of blocks.");    
+                    }
+                    tempHash = block.hash;    
+                });
+
+                Promise.all(promises).then((results) => { 
+                    results.forEach((result) => {
                         if(result != true)
                         {
                             errorLog.push("One of the block is invalid");
-                        }
-                        else //valid block
-                        {
-                            if(block.height > 0)
-                            {
-                                if(block.previousBlockHash != tempHash)
-                                {
-                                    errorLog.push("Invalid blockchain. Improper order of blocks.");
-                                }
-                            }
-                            tempHash = block.hash;
                         }
                     });
                 });
@@ -270,7 +275,6 @@ class Blockchain {
             }
         });
     }
-
 }
 
 module.exports.Blockchain = Blockchain;   

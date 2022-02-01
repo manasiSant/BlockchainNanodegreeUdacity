@@ -44,7 +44,7 @@ class Block {
             // Recalculate the hash of the Block
             var newHash = SHA256(JSON.stringify(self)).toString();
             self.hash = currentHash;
-            
+
             // Comparing if the hashes changed
             if (newHash == currentHash) {
                 // Returning the Block is valid
