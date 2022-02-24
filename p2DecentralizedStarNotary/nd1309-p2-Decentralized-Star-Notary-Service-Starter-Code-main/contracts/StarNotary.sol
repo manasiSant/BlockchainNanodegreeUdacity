@@ -3,14 +3,18 @@ pragma experimental ABIEncoderV2;
 
 //Importing openzeppelin-solidity ERC-721 implemented Standard
 import "../node_modules/openzeppelin-solidity/contracts/token/ERC721/ERC721.sol";
+import "../node_modules/openzeppelin-solidity/contracts/token/ERC721/ERC721Metadata.sol";
 
 // StarNotary Contract declaration inheritance the ERC721 openzeppelin implementation
-contract StarNotary is ERC721 {
+contract StarNotary is ERC721, ERC721Metadata {
 
     // Star data
     struct Star {
         string name;
         string symbol;
+    }
+
+    constructor() ERC721Metadata("ManasiStarNotary", "MSN") public {
     }
 
     // Implement Task 1 Add a name and symbol properties
@@ -56,9 +60,10 @@ contract StarNotary is ERC721 {
     }
 
     // Implement Task 1 lookUptokenIdToStarInfo
-    function lookUptokenIdToStarInfo (uint _tokenId) public view returns (Star memory s) {
+    function lookUptokenIdToStarInfo (uint _tokenId) public view returns (string memory s) {
         //1. You should return the Star saved in tokenIdToStarInfo mapping
-        s = tokenIdToStarInfo[_tokenId];
+        Star memory tempStar = tokenIdToStarInfo[_tokenId];
+        s = tempStar.name;
     }
 
     // Implement Task 1 Exchange Stars function

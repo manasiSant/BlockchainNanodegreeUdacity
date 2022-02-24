@@ -106,9 +106,9 @@ it('can add the star name and star symbol properly', async() => {
     await instance.createStar('awesome star', 'NEW6', starId, {from: user1});
     
     //2. Call the name and symbol properties in your Smart Contract and compare with the name and symbol provided
-    let startInfo = await instance.lookUptokenIdToStarInfo(starId);
+    let startInfo = await instance.tokenIdToStarInfo.call(starId);
     assert.equal(startInfo.name, 'awesome star');
-    assert.equal(startInfo.symbol, 'NEW6');
+    assert.equal(startInfo[1], 'NEW6');
 });
 
 it('lets 2 users exchange stars', async() => {
@@ -163,6 +163,6 @@ it('lookUptokenIdToStarInfo test', async() => {
     let startInfo = await instance.lookUptokenIdToStarInfo(starId);
     
     // 3. Verify if you Star name is the same
-    assert.equal(startInfo[0], '10th star');
+    assert.equal(startInfo, '10th star');
     
 });
