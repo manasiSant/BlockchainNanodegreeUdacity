@@ -18,6 +18,8 @@
  *
  */
 
+ const HDWalletProvider = require('truffle-hdwallet-provider');
+
 // const HDWalletProvider = require('@truffle/hdwallet-provider');
 //
 // const fs = require('fs');
@@ -46,6 +48,14 @@ module.exports = {
      port: 8545,            // Standard Ethereum port (default: none)
      network_id: "*",       // Any network (default: none)
      websockets: true
+    },
+    rinkeby: {
+      provider: () => new HDWalletProvider('<Menomonic removed>', 
+            `https://rinkeby.infura.io/v3/e67acc098ae64ab4a3c2c64f56e77bc7`),
+        network_id: 4,       // rinkeby's id
+        gas: 4500000,        // rinkeby has a lower block limit than mainnet
+        gasPrice: 10000000000,
+        networkCheckTimeout: 999999
     },
     // Another network with more advanced options...
     // advanced: {

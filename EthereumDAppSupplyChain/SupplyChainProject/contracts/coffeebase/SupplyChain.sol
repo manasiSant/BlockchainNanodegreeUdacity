@@ -250,23 +250,17 @@ contract SupplyChain is Ownable, FarmerRole, DistributorRole, RetailerRole, Cons
 
   // Define a function 'receiveItem' that allows the retailer to mark an item 'Received'
   // Use the above modifiers to check if the item is shipped
-  function receiveItem(uint _upc) public payable
+  function receiveItem(uint _upc) public
     // Call modifier to check if upc has passed previous supply chain stage
     shipped(_upc)
-    // Call modifer to check if buyer has paid enough
-    paidEnough(items[_upc].productPrice)
+    
     // Access Control List enforced by calling Smart Contract / DApp
     onlyRetailer
-    // Call modifer to send any excess ether back to buyer
-    checkValue(_upc) 
     {
       // Update the appropriate fields - ownerID, retailerID, itemState
     items[_upc].itemState = State.Received;
     items[_upc].ownerID = msg.sender;
     items[_upc].retailerID = msg.sender;
-
-    // Transfer money to disributor
-    payable(items[_upc].distributorID).transfer(items[_upc].productPrice);
 
     // Emit the appropriate event
     emit Received(_upc);
@@ -274,23 +268,17 @@ contract SupplyChain is Ownable, FarmerRole, DistributorRole, RetailerRole, Cons
 
   // Define a function 'purchaseItem' that allows the consumer to mark an item 'Purchased'
   // Use the above modifiers to check if the item is received
-  function purchaseItem(uint _upc) public payable
+  function purchaseItem(uint _upc) public
     // Call modifier to check if upc has passed previous supply chain stage
     received(_upc)
-    // Call modifer to check if buyer has paid enough
-    paidEnough(items[_upc].productPrice)
+    
     // Access Control List enforced by calling Smart Contract / DApp
     onlyConsumer
-    // Call modifer to send any excess ether back to buyer
-    checkValue(_upc)
     {
     // Update the appropriate fields - ownerID, consumerID, itemState
     items[_upc].itemState = State.Purchased;
     items[_upc].ownerID = msg.sender;
     items[_upc].consumerID = msg.sender;
-
-    // Transfer money to retailer
-    payable(items[_upc].retailerID).transfer(items[_upc].productPrice);
 
     // Emit the appropriate event
     emit Purchased(_upc);
