@@ -1,0 +1,23 @@
+{
+  "name": "flightsurety",
+  "version": "1.0.0",
+  "description": "",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "truffle test ./test/flightSurety.js",
+    "dapp": "webpack-dev-server --mode development --config webpack.config.dapp.js",
+    "dapp:prod": "webpack --mode production  --config webpack.config.dapp.js",
+    "server": "rm -rf ./build/server && webpack --config webpack.config.server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "truffle": "5.0.2",
+    "openzeppelin-solidity": "^1.10.0",
+    "web3": "^1.7.1",
+    "webpack": "^4.6.0"
+  }
+}
