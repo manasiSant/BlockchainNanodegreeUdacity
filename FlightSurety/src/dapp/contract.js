@@ -17,8 +17,11 @@ export default class Contract {
     }
 
     initialize(callback) {
+        
         this.web3.eth.getAccounts((error, accts) => {
             this.owner = accts[0];
+
+            this.flightSuretyData.methods.authorizeContract(this.flightSuretyApp._address).call({from: this.owner});
 
             let counter = 1;
             
@@ -35,25 +38,26 @@ export default class Contract {
     }
 
     async registerAndFundAllAirlines() {
-
+            let self = this;
             // registering and funding all airlines. Not providing UI for this. Testing has been done by truffle tests.
             // fund first airline
-            await this.flightSuretyData.methods
-                .fund()
-                .call({from: this.owner, value:this.web3.utils.toWei('10', 'ether')});
+            // await self.flightSuretyData.methods
+            //     .fund()
+            //     .call({from: self.airlines[0], value:self.web3.utils.toWei('10', 'ether')})
+            //     .then(console.log);
 
-            let cnt = 0;
-            while(cnt < 1) {
-                let name = "Airline-"+cnt;
-                await this.flightSuretyApp.methods
-                    .registerAirline(this.airlines[cnt], name)
-                    .call({from: this.owner});
+            // let cnt = 1;
+            // while(cnt < 5) {
+            //     let name = "Airline-"+cnt;
+            //     await self.flightSuretyApp.methods
+            //         .registerAirline(self.airlines[cnt], name)
+            //         .call({from: self.airlines[0]});
 
-                await this.flightSuretyData.methods
-                    .fund()
-                    .call({from: this.airlines[cnt], value:this.web3.utils.toWei('10', 'ether')});
-                cnt++;
-            }
+            //     await self.flightSuretyData.methods
+            //         .fund()
+            //         .call({from: self.airlines[0], value:self.web3.utils.toWei('10', 'ether')});
+            //     cnt++;
+            // }
     }
 
     isOperational(callback) {
@@ -77,28 +81,25 @@ export default class Contract {
             });
     }
 
-    registerFlight(num, from, to, callback) {
+    async registerFlight(num, from, to, callback) {
         let self = this;
-        //console.log( this.airlines[0]);
-        self.flightSuretyApp.methods
+        console.log( self.airlines[0]);
+        await self.flightSuretyApp.methods
             .registerFlight(num, from, to)
-            .send({from: self.owner, gas: 3000000})
+            .call({from: self.airlines[0], gas: 3000000})
                 .then(console.log);
     }
 
     async getAllFlights() {
         let self = this;
-        let total = parseInt(await self.flightSuretyApp.methods.getTotalAirlines().call());
-        console.log(total);
-        return total;
-        // let total = parseInt(await self.flightSuretyApp.methods.getTotalFlights().call());
-        // self.flights = [];
-        // for (let i = 0; i < total; i++) {
-        //     let flightKey = await self.flightSuretyData.methods.registeredFlights(i).call();
-        //     let flight = await self.flightSuretyData.methods.flights(flightKey).call();
-        //     self.flights.push(flight)
-        //     console.log(flight)
-        // }
-        // return self.flights;
+        let total = parseInt(await self.flightSuretyApp.methods.getTotalFlights().call());
+        console.log("total flights - " + total);
+        //self.flights = [];
+        for (let i = 0; i < total; i++) {
+            let res = await this.flightSuretyData.getFlightAtIndex(i).send().then(console.log);
+            //self.flights.push(flight)
+            //console.log(flight)
+        }
+        return self.flights;
     }
 }

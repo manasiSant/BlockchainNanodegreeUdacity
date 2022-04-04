@@ -177,6 +177,19 @@ contract FlightSuretyData {
         return airlines[airline].responses;
     }
 
+    function getFlightAtIndex(uint256 i) external view returns(string num, string from, string to, address airline){
+
+        if(registeredFlights.length > i) {
+            bytes32 key = registeredFlights[i];
+            
+            num = flights[key].num;
+            from = flights[key].from;
+            to = flights[key].to;
+            airline = flights[key].airline;
+        }
+        return(num, from, to, airline);
+    }
+
     function getTotalAirlines()  external  view requireIsOperational returns(uint256){
         return totalAirlines;
     }
@@ -223,7 +236,7 @@ contract FlightSuretyData {
                                 address airline
                             )
                             external
-                            requireIsCallerAuthorized
+                            
                             returns(bytes32)
     {
         bytes32 flightKey = getFlightKey(airline, flightNum, now);
@@ -290,8 +303,8 @@ contract FlightSuretyData {
         require(airlines[msg.sender].isFundReceived == false, "Airline is already funded");
         require(msg.value >= minimumFundAirlines, "Minimum fund required is 10 Ether");
 
-        msg.sender.transfer(minimumFundAirlines);
         airlines[msg.sender].isFundReceived = true;
+        msg.sender.transfer(minimumFundAirlines);
     }
 
     function getFlightKey

@@ -17,7 +17,7 @@ import './flightsurety.css';
             while (flightsDiv.hasChildNodes()) {
                 flightsDiv.removeChild(flightsDiv.firstChild);
             }
-            if (flights.length > 0) {
+            if (flights && flights.length > 0) {
                 flights.forEach(function(flight) {
                     flightsDiv.appendChild(flight);
                 });
@@ -50,17 +50,19 @@ import './flightsurety.css';
         })
 
         // Register flight
-        DOM.elid('registerFlight').addEventListener('click', async() => {
-            let num = DOM.elid('flightNo').value;
-            let from = DOM.elid('from').value;
-            let to = DOM.elid('to').value;
-            console.log("calling flight register - " + num + " " + from + " "+ to);
-            contract.registerFlight(num, from, to, (error, result) => {
-                console.log("flight register done");
-                alert("Fligth registered");
+        async function registerFlight() {
+            DOM.elid('registerFlight').addEventListener('click', async() => {
+                let num = DOM.elid('flightNo').value;
+                let from = DOM.elid('from').value;
+                let to = DOM.elid('to').value;
+                contract.registerFlight(num, from, to, (error, result) => {
+                    console.log("flight register done");
+                    alert("Fligth registered");
+                });
             });
-        });
-
+        }
+        registerFlight();
+        
         // get all flights
         DOM.elid('allFlights').addEventListener('click', async() => {
             contract.getAllFlights((error, result) => {

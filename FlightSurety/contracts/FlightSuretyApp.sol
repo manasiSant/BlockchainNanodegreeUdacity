@@ -165,7 +165,7 @@ contract FlightSuretyApp {
                                 returns(bytes32)
     {
         require(flightSuretyData.isOperational() == true,"Operational status false.");
-        require(flightSuretyData.isAirlineFunded(msg.sender) == true, "Only funded airline can register another airline.");
+        //require(flightSuretyData.isAirlineFunded(msg.sender) == true, "Only funded airline can register flight.");
         address airline = msg.sender;
         bytes32 flightKey = flightSuretyData.registerFlight(flightNum, from, to, airline);
         return flightKey;
