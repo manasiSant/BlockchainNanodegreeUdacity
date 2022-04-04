@@ -21,8 +21,41 @@
 
     <main class="container">
 
+        <!-- Operational status -->
         <div id="display-wrapper" class="top-20">
         </div>
+        <br />
+        <br />
+        <br />
+
+        <!-- Register flight -->
+        <div class="top-20">
+            <h2>Register Flight</h2>
+            <br />
+            <br />
+            <label>Flight Number:</label>
+            <input id="flightNo" type="text" placeholder="Flight Number">
+            <br />
+            <label>From:</label>
+            <input id="from" type="text" placeholder="From">
+            <br />
+            <label>To:</label>
+            <input id="to" type="text" placeholder="To">
+            <br />
+            <button id="registerFlight" class="btn btn-success">Register Flight <i data-feather="send"></i></button>
+        </div>
+        <br />
+        <br />
+        <br />
+
+        <!-- get all registered flights -->
+        <div class="top-20">
+            <h2>Registered Flights</h2>
+            <button id="allFlights" class="btn btn-success">Get All Flights <i data-feather="refresh-cw"></i></button>
+            <div class="row" id="flights">
+            </div>
+        </div>
+
         <div class="row top-20">
             <label class="form">Flight</label> <input type="text" id="flight-number"> <btn class="btn btn-primary" id="submit-oracle">Submit to Oracles</btn>
         </div>

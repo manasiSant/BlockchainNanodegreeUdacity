@@ -15,6 +15,16 @@ contract FlightSuretyData {
     uint256 minimumFundAirlines = 10 ether; 
     uint256 totalAirlines = 0;
 
+    struct Flight {
+        string num;
+        string from;
+        string to;
+        address airline;
+        bool isRegistered;
+    }
+    mapping(bytes32 => Flight) private flights;
+    bytes32[] registeredFlights;
+
     struct Airline {
         bool isRegistered;
         address[] responses;
@@ -82,6 +92,7 @@ contract FlightSuretyData {
         require(authorizedContracts[msg.sender] == 1, "Caller is not contract owner");
         _;
     }
+
     /********************************************************************************************/
     /*                                       UTILITY FUNCTIONS                                  */
     /********************************************************************************************/
@@ -121,6 +132,10 @@ contract FlightSuretyData {
 
     function isAirlineFunded(address airline) external view returns(bool){
         return(airlines[airline].isFundReceived);
+    }
+
+    function isFlightRegistered(bytes32 flightKey) external view returns(bool){
+        require(flights[flightKey].isRegistered, "flight is not registered");
     }
 
     function getAirline(address airline) 
@@ -166,11 +181,14 @@ contract FlightSuretyData {
         return totalAirlines;
     }
 
-    function setAirlineAsRegistered(address airline)  external  requireIsOperational requireIsCallerAuthorized {
+    function getTotalFlights() external view returns(uint256) {
+        return registeredFlights.length;
+    }
+
+    function setAirlineAsRegistered(address airline)  external  requireIsOperational {
         airlines[airline].isRegistered = true;
         totalAirlines = totalAirlines.add(1);
     }
-
 
    /**
     * @dev Add an airline to the registration queue
@@ -183,13 +201,9 @@ contract FlightSuretyData {
                                 string airlineName
                             )
                             external
-                            requireIsCallerAuthorized
                             returns(uint256)
     {
         address[] prevResponses = airlines[airlineToRegister].responses;
-        /*if(prevResponses.length == 0){
-            prevResponses = new address[](0);
-        }*/
         airlines[airlineToRegister] = Airline({
                                 isRegistered: false,
                                 isFundReceived: false,
@@ -198,10 +212,31 @@ contract FlightSuretyData {
                         });
 
         airlines[airlineToRegister].responses.push(msg.sender);
-        //airlines[airlineToRegister].responses[airlines[airlineToRegister].responses.length++] = msg.sender;
         return airlines[airlineToRegister].responses.length;
     }
 
+    function registerFlight
+                            (
+                                string flightNum,
+                                string whereFrom,
+                                string whereTo,
+                                address airline
+                            )
+                            external
+                            requireIsCallerAuthorized
+                            returns(bytes32)
+    {
+        bytes32 flightKey = getFlightKey(airline, flightNum, now);
+        flights[flightKey] = Flight({
+            num: flightNum,
+            airline: airline,
+            from: whereFrom,
+            to: whereTo,
+            isRegistered: true
+        });
+        registeredFlights.push(flightKey);
+        return flightKey;
+    }
 
    /**
     * @dev Buy insurance for a flight
@@ -246,9 +281,9 @@ contract FlightSuretyData {
     *
     */   
     function fund
-                            (   
+                            (  
                             )
-                            public
+                            external
                             payable
     {
         require(airlines[msg.sender].isRegistered == true, "Airline should be registered before funding");
@@ -280,7 +315,7 @@ contract FlightSuretyData {
                             external 
                             payable 
     {
-        fund();
+        //fund();
     }
 
 

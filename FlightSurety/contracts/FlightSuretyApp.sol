@@ -87,17 +87,26 @@ contract FlightSuretyApp {
     /********************************************************************************************/
 
     function isOperational() 
-                            public 
-                            pure 
+                            external  
                             returns(bool) 
     {
-        return true;  // Modify to call data contract's status
+        return flightSuretyData.isOperational();
+    }
+
+    function getTotalFlights() 
+                            external 
+                            returns(uint256) 
+    {
+        return flightSuretyData.getTotalFlights();
     }
 
     /********************************************************************************************/
     /*                                     SMART CONTRACT FUNCTIONS                             */
     /********************************************************************************************/
 
+    function getTotalAirlines() external returns(uint256){
+         return flightSuretyData.getTotalAirlines();
+    }
   
    /**
     * @dev Add an airline to the registration queue
@@ -148,11 +157,18 @@ contract FlightSuretyApp {
     */  
     function registerFlight
                                 (
+                                    string flightNum,
+                                    string from,
+                                    string to
                                 )
                                 external
-                                pure
+                                returns(bytes32)
     {
-
+        require(flightSuretyData.isOperational() == true,"Operational status false.");
+        require(flightSuretyData.isAirlineFunded(msg.sender) == true, "Only funded airline can register another airline.");
+        address airline = msg.sender;
+        bytes32 flightKey = flightSuretyData.registerFlight(flightNum, from, to, airline);
+        return flightKey;
     }
     
    /**
@@ -368,22 +384,36 @@ contract FlightSuretyApp {
 }   
 
 interface FlightSuretyData {
+    function isOperational() public view returns(bool);
+
     function isAirlineRegistered(address airline) external view returns(bool);
 
     function isAirlineFunded(address airline) external view returns(bool);
 
     function getAirlinesResponses(address airline) external  view returns(address[]);
 
+    function isFlightRegistered(bytes32 flightKey) external view returns(bool);
+
     function getTotalAirlines()  external view returns(uint256);
+
+    function getTotalFlights()  external view returns(uint256);
 
     function setAirlineAsRegistered(address airline)  external;
 
-    function fund() public payable;
+    function fund() external payable;
 
     function registerAirline
-                            (
-                                address airlineToRegister,
-                                string airlineName
-                            )
-                            external returns(uint256);
+        (
+            address airlineToRegister,
+            string airlineName
+        )
+        external returns(uint256);
+
+    function registerFlight
+        (
+            string flightNum,
+            string from,
+            string to,
+            address airline
+        ) external returns(bytes32);                   
 }

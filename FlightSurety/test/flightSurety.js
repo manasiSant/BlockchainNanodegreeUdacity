@@ -116,10 +116,12 @@ contract('Flight Surety Tests', async (accounts) => {
     const fourthAirline = config.testAddresses[4];
     let name4 = "Air UK";
 
+    const firstAirline = config.firstAirline;
+    
     // ACT
-    await config.flightSuretyApp.registerAirline(secondAirline, name2, {from: config.firstAirline});
-    await config.flightSuretyApp.registerAirline(thirdAirline, name3, {from: config.firstAirline});
-    await config.flightSuretyApp.registerAirline(fourthAirline, name4, {from: config.firstAirline});
+    await config.flightSuretyApp.registerAirline(secondAirline, name2, {from: firstAirline});
+    await config.flightSuretyApp.registerAirline(thirdAirline, name3, {from: firstAirline});
+    await config.flightSuretyApp.registerAirline(fourthAirline, name4, {from: firstAirline});
 
     let result2 = await config.flightSuretyData.isAirlineRegistered.call(secondAirline); 
     let result3 = await config.flightSuretyData.isAirlineRegistered.call(thirdAirline); 
@@ -134,6 +136,7 @@ contract('Flight Surety Tests', async (accounts) => {
     let result7 = await config.flightSuretyData.isAirlineFunded.call(fourthAirline); 
     
     // ASSERT
+    assert.equal(result2, true, "Second airline should be registered and funded");
     assert.equal(result2 && result5, true, "Second airline should be registered and funded");
     assert.equal(result3 && result6, true, "Third airline should be registered and funded");
     assert.equal(result4 && result7, true, "Fourth airline should be registered and funded");
@@ -158,5 +161,4 @@ contract('Flight Surety Tests', async (accounts) => {
     assert.equal(res1, false, "Fifth airline should NOT be registered");
     assert.equal(res2, true, "Fifth airline should be registered now");
   });
-
 });
