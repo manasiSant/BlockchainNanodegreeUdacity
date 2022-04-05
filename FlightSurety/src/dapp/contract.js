@@ -51,12 +51,12 @@ export default class Contract {
             // fund first airline
             let res = await self.flightSuretyData.methods.getAirline(self.airlines[0]).call();
             
-            // await self.flightSuretyData.methods
-            //     .fund()
-            //     .send({from: self.airlines[0], value:self.web3.utils.toWei('10', 'ether'), gas: 5000000,
-            //     gasPrice: 406726626})
-            //     .then(console.log);
-            // console.log("Funding done for first airline ");
+            await self.flightSuretyData.methods
+                .fund()
+                .send({from: self.airlines[0], value:self.web3.utils.toWei('10', 'ether'), gas: 5000000,
+                gasPrice: 406726626})
+                .then(console.log);
+            console.log("Funding done for first airline ");
             
             res = await self.flightSuretyData.methods.getAirline(self.airlines[0]).call();
             return {address: self.airlines[0], name: res.name}; 
