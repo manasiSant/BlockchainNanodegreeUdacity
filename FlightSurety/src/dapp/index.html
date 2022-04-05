@@ -21,44 +21,46 @@
 
     <main class="container">
 
-        <!-- Operational status -->
-        <div id="display-wrapper" class="top-20">
-        </div>
-        <br />
-        <br />
-        <br />
-
-        <!-- Register flight -->
-        <div class="top-20">
-            <h2>Register Flight</h2>
-            <br />
-            <br />
-            <label>Flight Number:</label>
-            <input id="flightNo" type="text" placeholder="Flight Number">
-            <br />
-            <label>From:</label>
-            <input id="from" type="text" placeholder="From">
-            <br />
-            <label>To:</label>
-            <input id="to" type="text" placeholder="To">
-            <br />
-            <button id="registerFlight" class="btn btn-success">Register Flight <i data-feather="send"></i></button>
-        </div>
-        <br />
-        <br />
-        <br />
-
         <!-- get all registered flights -->
         <div class="top-20">
             <h2>Registered Flights</h2>
-            <button id="allFlights" class="btn btn-success">Get All Flights <i data-feather="refresh-cw"></i></button>
             <div class="row" id="flights">
             </div>
         </div>
 
-        <div class="row top-20">
-            <label class="form">Flight</label> <input type="text" id="flight-number"> <btn class="btn btn-primary" id="submit-oracle">Submit to Oracles</btn>
+        <div class="top-20">
+            <h2>Passenger actions</h2>
+            <label>Flights:</label>
+            <select name="flightsList" id="flightsList">
+            <option value="" selected="selected">Select flight</option>
+            </select>
+            <br><br>
+            <label>Amount (in ether) (upto 1 ether):</label>
+            <input id="amount" type="int" placeholder="amount">
+            <br />
+            <br />
+            <btn class="btn btn-primary" id="purchase">Purchase Insurance</btn>
+            <btn class="btn btn-primary" id="payment">Receive payment</btn>
+            <br />
+            <br />
+            <btn class="btn btn-primary" id="getAmount">Get claim amount</btn>
+            <label id="claimAmount"></label>
+            <br />
+            <br />
         </div>
+
+        <div class="row top-20">
+            <label class="form">Flights</label> 
+            <select name="flightsList2" id="flightsList2">
+            <option value="" selected="selected">Select flight</option>
+            </select>
+            <btn class="btn btn-primary" id="submit-oracle">Submit to Oracles</btn>
+        </div>
+
+        <div id="display-wrapper" class="top-20">
+        </div>
+        <br />
+        
     </main>
 
 </body>

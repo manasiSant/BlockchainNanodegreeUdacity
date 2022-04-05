@@ -13,6 +13,7 @@ contract FlightSuretyData {
     bool private operational = true;                                    // Blocks all state changes throughout the contract if false
 
     uint256 minimumFundAirlines = 10 ether; 
+    uint256 maximumPurchase = 1 ether;
     uint256 totalAirlines = 0;
 
     struct Flight {
@@ -34,6 +35,17 @@ contract FlightSuretyData {
     mapping(address => Airline) private airlines;
 
     mapping(address => uint256) private authorizedContracts;
+
+    struct Insurance {
+        address airline;
+        address passenger;
+        uint256 amount;
+        bool claimed;
+    }
+    mapping(bytes32 => Insurance[]) private insurances;
+
+    mapping(address => uint256) private fundsToPay;
+
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
     /********************************************************************************************/
@@ -58,6 +70,7 @@ contract FlightSuretyData {
                                 });
         
         totalAirlines = 1;
+        authorizedContracts[contractOwner] = 1;
     }
 
     /********************************************************************************************/
@@ -143,6 +156,7 @@ contract FlightSuretyData {
                         returns(bool isRegistered,
                         bool isFundReceived,
                         string name){
+
         isRegistered = airlines[airline].isRegistered;
         isFundReceived = airlines[airline].isFundReceived;
         name = airlines[airline].name;
@@ -211,20 +225,20 @@ contract FlightSuretyData {
     function registerAirline
                             (
                                 address airlineToRegister,
-                                string airlineName
+                                string airlineName,
+                                address callingAirline
                             )
                             external
                             returns(uint256)
     {
         address[] prevResponses = airlines[airlineToRegister].responses;
+        prevResponses.push(callingAirline);
         airlines[airlineToRegister] = Airline({
                                 isRegistered: false,
                                 isFundReceived: false,
                                 name: airlineName,
                                 responses: prevResponses
                         });
-
-        airlines[airlineToRegister].responses.push(msg.sender);
         return airlines[airlineToRegister].responses.length;
     }
 
@@ -236,7 +250,6 @@ contract FlightSuretyData {
                                 address airline
                             )
                             external
-                            
                             returns(bytes32)
     {
         bytes32 flightKey = getFlightKey(airline, flightNum, now);
@@ -251,17 +264,55 @@ contract FlightSuretyData {
         return flightKey;
     }
 
+    function processFlightStatus(address airline, string flight, uint256 timestamp, uint8 statusCode) 
+                    external 
+                    requireIsOperational 
+    {
+        bytes32 flightKey = getFlightKey(airline, flight, timestamp);
+        if (statusCode == 20) {
+            this.creditInsurees(flightKey);
+        }
+    }
+
    /**
     * @dev Buy insurance for a flight
     *
     */   
     function buy
-                            (                             
+                            (  
+                                string flightNum,
+                                address airline                         
                             )
                             external
                             payable
     {
+        require(msg.value <= maximumPurchase, "Max purchase required is 1 Ether");        
+        require(airlines[airline].isRegistered , "Airline should be registered");
 
+        // check flight validity
+        bool flightValid = false;
+        bytes32 flightKey;
+        for(uint256 i = 0; i< registeredFlights.length; i++){
+            if(compareStrings(flights[registeredFlights[i]].num, flightNum)) {
+                flightValid = true;
+                flightKey = registeredFlights[i];
+                break;
+            }
+        }
+        require(flightValid, "Invalid flight");
+
+        address passenger = msg.sender;
+        
+        // transfer
+        Insurance[] prevInsurances = insurances[flightKey];
+        prevInsurances.push(Insurance({
+            airline: airline,
+            amount: msg.value,
+            passenger: passenger,
+            claimed: false
+        }));
+        insurances[flightKey] = prevInsurances;
+        passenger.transfer(msg.value);
     }
 
     /**
@@ -269,10 +320,18 @@ contract FlightSuretyData {
     */
     function creditInsurees
                                 (
+                                    bytes32 flightKey
                                 )
                                 external
-                                pure
     {
+          for (uint256 i = 0; i < insurances[flightKey].length; i++) {
+            Insurance claim = insurances[flightKey][i];
+            if(claim.claimed == false){
+                claim.claimed = true;
+            }
+            uint256 amount = claim.amount.mul(3).div(2);
+            fundsToPay[claim.passenger] = fundsToPay[claim.passenger].add(amount);
+        }
     }
     
 
@@ -282,10 +341,28 @@ contract FlightSuretyData {
     */
     function pay
                             (
+                                address passenger
                             )
                             external
-                            pure
+                            returns(uint256)
     {
+        uint256 amount = fundsToPay[passenger];
+        require(address(this).balance >= amount, "No funds available");
+        require(amount > 0, "There are no funds available for withdrawal");
+        fundsToPay[passenger] = 0;
+        contractOwner.transfer(amount);
+        return(amount);
+    }
+
+    function getClaimAmount
+                            (
+                            )
+                            external
+                            view
+                            returns(uint256)
+    {
+        uint256 amount = fundsToPay[msg.sender];
+        return(amount);
     }
 
    /**
@@ -317,9 +394,12 @@ contract FlightSuretyData {
                         internal
                         returns(bytes32) 
     {
-        return keccak256(abi.encodePacked(airline, flight, timestamp));
+        return keccak256(abi.encodePacked(airline, flight));
     }
 
+    function compareStrings(string memory a, string memory b) public view returns (bool) {
+        return (keccak256(abi.encodePacked((a))) == keccak256(abi.encodePacked((b))));
+    }
     /**
     * @dev Fallback function for funding smart contract.
     *

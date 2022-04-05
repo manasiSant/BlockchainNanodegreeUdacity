@@ -119,6 +119,7 @@ contract FlightSuretyApp {
                                 string airlineName 
                             )
                             external
+                            returns(uint256)
                             
     {
         require(airlineToRegister != msg.sender, "airline cannot register itself.");
@@ -126,8 +127,9 @@ contract FlightSuretyApp {
         require(flightSuretyData.isAirlineFunded(msg.sender) == true, "Only funded airline can register another airline.");
         
         uint256 totalAirlines = flightSuretyData.getTotalAirlines();
+        address callingAirline = msg.sender; 
         if(totalAirlines < 4) {
-            flightSuretyData.registerAirline(airlineToRegister, airlineName);
+            uint256 votes = flightSuretyData.registerAirline(airlineToRegister, airlineName, callingAirline);
             flightSuretyData.setAirlineAsRegistered(airlineToRegister);
         }
         else {
@@ -142,7 +144,7 @@ contract FlightSuretyApp {
             }
             require(!isDuplicate, "Caller has already called this function.");
 
-            uint256 voteCnt = flightSuretyData.registerAirline(airlineToRegister, airlineName);
+            uint256 voteCnt = flightSuretyData.registerAirline(airlineToRegister, airlineName, callingAirline);
             uint256 requiredVotes = totalAirlines.div(2);
             if(voteCnt >= requiredVotes) {
                 flightSuretyData.setAirlineAsRegistered(airlineToRegister);
@@ -164,9 +166,12 @@ contract FlightSuretyApp {
                                 external
                                 returns(bytes32)
     {
-        require(flightSuretyData.isOperational() == true,"Operational status false.");
-        //require(flightSuretyData.isAirlineFunded(msg.sender) == true, "Only funded airline can register flight.");
         address airline = msg.sender;
+
+        require(flightSuretyData.isOperational() == true,"Operational status false.");
+        require(flightSuretyData.isAirlineRegistered(airline), "Only registered airline is allowed to register flight");
+        //require(flightSuretyData.isAirlineFunded(airline) == true, "Only funded airline can register flight.");
+
         bytes32 flightKey = flightSuretyData.registerFlight(flightNum, from, to, airline);
         return flightKey;
     }
@@ -183,8 +188,8 @@ contract FlightSuretyApp {
                                     uint8 statusCode
                                 )
                                 internal
-                                pure
     {
+        flightSuretyData.processFlightStatus(airline, flight, timestamp, statusCode);
     }
 
 
@@ -332,7 +337,7 @@ contract FlightSuretyApp {
                         internal
                         returns(bytes32) 
     {
-        return keccak256(abi.encodePacked(airline, flight, timestamp));
+        return keccak256(abi.encodePacked(airline, flight));
     }
 
     // Returns array of three non-duplicating integers from 0-9
@@ -405,7 +410,8 @@ interface FlightSuretyData {
     function registerAirline
         (
             address airlineToRegister,
-            string airlineName
+            string airlineName,
+            address callingAirline
         )
         external returns(uint256);
 
@@ -415,5 +421,13 @@ interface FlightSuretyData {
             string from,
             string to,
             address airline
-        ) external returns(bytes32);                   
+        ) external returns(bytes32);  
+
+    function processFlightStatus
+        (
+            address airline,
+            string flight,
+            uint256 timestamp,
+            uint8 statusCode
+        ) external; 
 }

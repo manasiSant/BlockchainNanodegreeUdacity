@@ -119,7 +119,7 @@ contract('Flight Surety Tests', async (accounts) => {
     const firstAirline = config.firstAirline;
     
     // ACT
-    await config.flightSuretyApp.registerAirline(secondAirline, name2, {from: firstAirline});
+    let votes2 = await config.flightSuretyApp.registerAirline(secondAirline, name2, {from: firstAirline});
     await config.flightSuretyApp.registerAirline(thirdAirline, name3, {from: firstAirline});
     await config.flightSuretyApp.registerAirline(fourthAirline, name4, {from: firstAirline});
 
@@ -161,4 +161,36 @@ contract('Flight Surety Tests', async (accounts) => {
     assert.equal(res1, false, "Fifth airline should NOT be registered");
     assert.equal(res2, true, "Fifth airline should be registered now");
   });
+
+  it('(flight) Register Flights', async () => {
+    // ARRANGE
+    const airline = config.firstAirline;
+    
+    // ACT
+    await config.flightSuretyApp.registerFlight("123", "abc", "xyz", {from: airline});
+    await config.flightSuretyApp.registerFlight("456", "lmn", "pqr", {from: config.testAddresses[2]});
+    await config.flightSuretyApp.registerFlight("789", "zxcv", "asdf", {from: config.testAddresses[3]});
+
+    let res1 = await config.flightSuretyData.getFlightAtIndex(0);
+    let res2 = await config.flightSuretyData.getFlightAtIndex(1);
+    let res3 = await config.flightSuretyData.getFlightAtIndex(2);
+
+    assert.equal(res1[0], "123", "id not matching");
+    assert.equal(res2[0], "456", "id not matching");
+    assert.equal(res3[0], "789", "id not matching");
+  });
+
+
+  it('(passenger) Buy insurance', async () => {
+    // ARRANGE
+    const airline = config.firstAirline;
+    const passenger = config.testAddresses[5];
+    let res1 = await config.flightSuretyData.getFlightAtIndex(0);
+    let insuranceAmount = web3.utils.toWei('1', 'ether');
+    let flight = res1[0];
+    // ACT
+    await config.flightSuretyData.buy(flight, airline, {from: passenger, value: insuranceAmount});
+    
+  });
+
 });
