@@ -189,8 +189,7 @@ contract('Flight Surety Tests', async (accounts) => {
     let insuranceAmount = web3.utils.toWei('1', 'ether');
     let flight = res1[0];
     // ACT
-    await config.flightSuretyData.buy(flight, airline, {from: passenger, value: insuranceAmount});
-    
+    await config.flightSuretyData.buy(flight, airline, {from: passenger, value: insuranceAmount});    
   });
 
 });
