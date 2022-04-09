@@ -13,6 +13,15 @@ The capstone will build upon the knowledge you have gained in the course in orde
 * [Docker](https://docs.docker.com/install/)
 * [ZoKrates](https://github.com/Zokrates/ZoKrates)
 
+Test instructions (steps)-
+
+    1. cd eth-contracts
+    2. npm install
+    3. truffle develop
+    4. test
+
+    (test screenshot added in TruffleTests.docx)
+
 Contract details - 
 
     Deploying 'SolnSquareVerifier'
