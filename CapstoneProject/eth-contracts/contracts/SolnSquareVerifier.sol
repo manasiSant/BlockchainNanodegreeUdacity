@@ -2,9 +2,10 @@ pragma solidity >=0.4.21 <0.6.0;
 
 // TODO define a contract call to the zokrates generated solidity contract <Verifier> or <renamedVerifier>
 import "./ERC721Mintable.sol";
+import "./verifier.sol";
 
 // TODO define another contract named SolnSquareVerifier that inherits from your ERC721Mintable class
-contract SolnSquareVerifier is CustomizedTokenERC721{
+contract SolnSquareVerifier is Verifier, CustomizedTokenERC721{
 
     // TODO define a solutions struct that can hold an index & an address
     struct Solution {
@@ -12,8 +13,8 @@ contract SolnSquareVerifier is CustomizedTokenERC721{
         uint256 index;
     }
 
-    // TODO define an array of the above struct
-    mapping(bytes32 => Solution) solutions;
+    // TODO define an array of the above struct (tokenId => Solution)
+    mapping(uint256 => Solution) solutions;
 
     // TODO define a mapping to store unique solutions submitted
     mapping(bytes32 => bool) uniqueSolutions;
@@ -23,8 +24,11 @@ contract SolnSquareVerifier is CustomizedTokenERC721{
     event SolutionAdded(uint256 index, address addr);
 
     // TODO Create a function to add the solutions to the array and emit the event
-    function addSolution(bytes32 _key, address _addr, uint256 _index) internal{
-        solutions[_key] = Solution({
+    function addSolution(address _addr, uint256 _index, uint[2] memory a, uint[2][2] memory b, uint[2] memory c, uint[2] memory input) public{
+        bytes32 _key = keccak256(abi.encodePacked(a, b, c, input));
+        require(!uniqueSolutions[_key], "Solution already exists");
+        uniqueSolutions[_key] = true;
+        solutions[_index] = Solution({
             index: _index,
             addr: _addr
         });
@@ -35,20 +39,11 @@ contract SolnSquareVerifier is CustomizedTokenERC721{
     // TODO Create a function to mint new NFT only after the solution has been verified
     //  - make sure the solution is unique (has not been used before)
     //  - make sure you handle metadata as well as tokenSuplly
-    function mint(address to, uint256 tokenID,
-        uint[2] memory a,
-        uint[2] memory a_p,
-        uint[2][2] memory b,
-        uint[2] memory b_p,
-        uint[2] memory c,
-        uint[2] memory c_p,
-        uint[2] memory h,
-        uint[2] memory k,
-        uint[2] memory input)
+    function mint(address to, uint256 tokenId, uint[2] memory a, uint[2][2] memory b, uint[2] memory c, uint[2] memory input)
     public returns(bool) {
-        bytes32 key = keccak256(abi.encodePacked(a, a_p, b, b_p, c, c_p, h, k, input));
-        require(solutions[key].addr == address(0), "require unique solution");
-        addSolution(key, to, tokenID);       
-        return super.mint(to, tokenID);
+        require(solutions[tokenId].index != tokenId,"solution already exist");
+        require(verifyTx(a, b, c, input), "proof is not valid");
+        addSolution(to, tokenId, a, b, c, input);
+        return super.mint(to, tokenId);
     }
 } 

@@ -1,10 +1,10 @@
-var ERC721MintableComplete = artifacts.require('ERC721MintableComplete');
+var ERC721MintableComplete = artifacts.require('CustomizedTokenERC721');
 
 contract('TestERC721Mintable', accounts => {
 
     const acc1 = accounts[0];
     const acc2 = accounts[1];
-    const acc3 = accounts[1];
+    const acc3 = accounts[2];
 
     const acc2Cnt = 10;
     const acc3Cnt = 30;
@@ -39,7 +39,7 @@ contract('TestERC721Mintable', accounts => {
         // token uri should be complete i.e: https://s3-us-west-2.amazonaws.com/udacity-blockchain/capstone/1
         it('should return token uri', async function () { 
             let tokenId = acc2Cnt +2; // picking some random token
-            let expectedTokenUri = "https://s3-us-west-2.amazonaws.com/udacity-blockchain/capstone/1" + tokenId;
+            let expectedTokenUri = "https://s3-us-west-2.amazonaws.com/udacity-blockchain/capstone/" + tokenId;
             let tokenUri = await this.contract.tokenURI.call(tokenId, {from: acc1});
             assert.equal(
                 tokenUri,
@@ -57,7 +57,7 @@ contract('TestERC721Mintable', accounts => {
 
     describe('have ownership properties', function () {
         beforeEach(async function () { 
-            this.contract = await ERC721MintableComplete.new({from: account_one});
+            this.contract = await ERC721MintableComplete.new({from: acc1});
         })
 
         it('should fail when minting when address is not contract owner', async function () { 
@@ -73,7 +73,7 @@ contract('TestERC721Mintable', accounts => {
         })
 
         it('should return contract owner', async function () { 
-            let actualOwner = await this.contract.getOwner.call();
+            let actualOwner = await this.contract.getContractOwner();
             assert.equal(actualOwner, acc1, "Wrong contract owner");          
         })
 

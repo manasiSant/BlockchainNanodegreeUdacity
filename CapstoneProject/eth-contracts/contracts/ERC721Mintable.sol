@@ -1,4 +1,4 @@
-pragma solidity ^0.5.5;
+pragma solidity ^0.5.2;
 
 import 'openzeppelin-solidity/contracts/utils/Address.sol';
 import 'openzeppelin-solidity/contracts/drafts/Counters.sol';
@@ -10,7 +10,10 @@ contract Ownable {
     //  TODO's
     //  1) create a private '_owner' variable of type address with a public getter function
     address internal _owner;
-    
+
+    function getContractOwner() public view returns(address){
+        return _owner;
+    }    
     //  2) create an internal constructor that sets the _owner var to the creater of the contract 
     constructor() internal {
         _owner = msg.sender;
